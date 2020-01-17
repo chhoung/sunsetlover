@@ -3,6 +3,7 @@ import 'package:location/location.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert' as convert;
 import 'package:intl/intl.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 void main() => runApp(MyApp());
 
@@ -20,12 +21,15 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   LocationData currentLocation;
-
+  RefreshController _refreshController =
+      RefreshController(initialRefresh: false);
   var location = Location();
 
   var longitude;
-
   var latitude;
+
+//  var longitude = 104.9282;
+//  var latitude = 11.5564;
 
   var date;
 
@@ -56,9 +60,9 @@ class _MyAppState extends State<MyApp> {
 
       sunsetData = SunsetClass(time: time, date: sunsetDate);
 
-//      print(time);
-//      print(sunsetDate);
-//      print(utcDateTime.toLocal().toString());
+      print(time);
+      print(sunsetDate);
+      print(utcDateTime.toLocal().toString());
     } else {
       print('Request failed with status: ${response.statusCode}.');
     }
@@ -71,44 +75,70 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       theme: ThemeData.dark(),
       home: Scaffold(
-        body: Center(
-          child: FutureBuilder<SunsetClass>(
-            future: getSunsetTime(),
-            builder: (context, snapshot) {
-              if (snapshot.data == null) {
-                return Container(
-                  child: Center(
-                    child: CircularProgressIndicator(),
-//                    child: Text(
-//                      'Loading sunset data..',
-//                      style:
-//                          TextStyle(fontFamily: 'ShareTechMono', fontSize: 69),
-//                    ),
-                  ),
-                );
-              } else {
-                return Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Text(
-                      snapshot.data.time,
-                      style: TextStyle(
-                        fontFamily: 'ShareTechMono',
-                        fontSize: 69,
-                        color: Color(0xFFFD5E53),
+        body: SmartRefresher(
+          enablePullDown: true,
+          header: WaterDropHeader(),
+          controller: _refreshController,
+          onRefresh: () {
+            setState(() {
+              print("refresh");
+            });
+            _refreshController.refreshCompleted();
+          },
+          child: Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage("assets/sunsetpic.jpg"),
+                fit: BoxFit.cover,
+              ),
+            ),
+            child: Center(
+              child: FutureBuilder<SunsetClass>(
+                future: getSunsetTime(),
+                builder: (context, snapshot) {
+                  if (snapshot.data == null) {
+                    return Container(
+                      child: Text(
+                        'Loading sunset hour..',
+                        style: TextStyle(
+                            fontFamily: 'ShareTechMono', fontSize: 69),
                       ),
-                    ),
-                    Text(
-                      'Sunset on ' + snapshot.data.date,
-                      style: TextStyle(
-                        fontFamily: 'ShareTechMono',
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                );
-              }
-            },
+                    );
+                  } else {
+                    return Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        SizedBox(
+                          height: 20.0,
+                        ),
+                        Text(
+                          snapshot.data.time,
+                          style: TextStyle(
+                            fontFamily: 'ShareTechMono',
+                            fontSize: 109,
+                            // color: Color(0xFFFD5E53),
+                          ),
+                        ),
+                        SizedBox(
+                          height: 10.0,
+                        ),
+                        Container(
+                          margin: EdgeInsets.only(left: 11),
+                          child: Text(
+                            'Sunset on ' + snapshot.data.date,
+                            style: TextStyle(
+                              fontFamily: 'ShareTechMono',
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  }
+                },
+              ),
+            ),
           ),
         ),
       ),
