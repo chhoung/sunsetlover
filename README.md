@@ -14,6 +14,7 @@ These instructions will get you a copy of the project up and running on your loc
 
 ## Running the tests
 Here are the screenshots from the app.
+![Screenshot_1583135413](https://user-images.githubusercontent.com/22555508/76070735-9a4ba200-5fc7-11ea-986f-79a15c2757e5.png)
 
 ## Built With
 
